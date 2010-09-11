@@ -1,8 +1,8 @@
 /*
- * $Id$
+ * $Id: bigint.js,v 0.1 2010/09/11 17:07:30 dankogai Exp dankogai $
  */
 
-(function(){
+(function() {
 
 // Original: http://www.onicos.com/staff/iz/amuse/javascript/expert/BigInt.txt
 //
@@ -271,7 +271,7 @@ function bigint_neg(x) {
 }
 function bigint_add_internal(x, y, sign) {
     var z, num, i, len;
-    sign = !!sign; ;
+    sign = !!sign;
     if (x.sign != sign) {
         return sign ? bigint_sub_internal(y, x)
                     : bigint_sub_internal(x, y);
@@ -306,8 +306,8 @@ function bigint_add_internal(x, y, sign) {
 function bigint_sub_internal(x, y) {
     var z, zds, num, i, cmp = bigint_cmp(x, y), rev = 0;
     if (cmp === 0) return bzero;
-    if (cmp <   0) { rev = 1; z = x; x = y; y = z; } // swap x y
-    z =  x.clone();
+    if (cmp < 0) { rev = 1; z = x; x = y; y = z; } // swap x y
+    z = x.clone();
     var zds = z.digits, xds = x.digits, yds = y.digits;
     for (i = 0, num = 0; i < y.len; i++) {
         num = xds[i] - yds[i] - num;
@@ -521,19 +521,19 @@ function bigint_number(x) {
  */
 
 BigInt.prototype = {
-    toString:_BigInt_toString,
-    toStringBase:_BigInt_toStringBase,
-    clone:_BigInt_clone,
-    add:function(y){ return bigint_add(y, this) },
-    sub:function(y){ return bigint_sub(this, y) },
-    mul:function(y){ return bigint_mul(this, y) },
-    div:function(y){ return bigint_div(this, y) },
-    mod:function(y){ return bigint_mod(this, y) },
-    cmp:function(y){ return bigint_cmp(this, y) },
-    neg:function(y){ return bigint_neg(this)    }
+    toString: _BigInt_toString,
+    toStringBase: _BigInt_toStringBase,
+    clone: _BigInt_clone,
+    add: function(y) { return bigint_add(y, this) },
+    sub: function(y) { return bigint_sub(this, y) },
+    mul: function(y) { return bigint_mul(this, y) },
+    div: function(y) { return bigint_div(this, y) },
+    mod: function(y) { return bigint_mod(this, y) },
+    cmp: function(y) { return bigint_cmp(this, y) },
+    neg: function(y) { return bigint_neg(this) }
 };
 
 Math.BigInt = BigInt;
-bigint = function(a){ return bigint_from_any(a) };
+bigint = function(a) { return bigint_from_any(a) };
 
 })();

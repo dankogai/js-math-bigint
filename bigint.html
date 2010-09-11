@@ -1,0 +1,49 @@
+<script src="bigint.js"></script> 
+
+<div style="border:outset 1px; padding:0.5em">
+<textarea cols="64" rows="32">
+var x = bigint("1234567890123456789012345678901234567890");
+var y = new Math.BigInt("12345678901234567890");
+p( x.add(y) );
+p( x.sub(y) );
+p( x.mul(y) );
+p( x.div(y) );
+p( x.mod(y) );
+p( x.cmp(y) );
+p( x.neg()  );
+
+
+function fact(n){
+  var r = bigint(n);
+  while(--n) r = r.mul(n);
+  return r;
+}
+
+p (fact(1000));
+
+p (fact(101).div(fact(100)));
+
+</textarea><br><input type="submit" value="run"   onclick="rundom(this)"
+><input type="submit" value="clear" onclick="clsdom(this)"
+><pre></pre>
+</div>
+
+<script>
+rundom = function(that){
+    try{
+        var out = that.nextSibling.nextSibling;
+        var p = function(s){
+            out.innerHTML += s,
+            out.appendChild(document.createElement('br'));
+        }
+        var e = that.previousSibling.previousSibling;
+        var f = new Function( 'p', (e.value || e.innerText || e.textContent) );
+        f(p);     
+    }catch(e){
+        alert(e);
+    }
+};
+clsdom = function(that){
+  that.nextSibling.innerHTML = '';
+};
+</script>

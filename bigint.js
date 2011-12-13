@@ -1,5 +1,5 @@
 /*
- * $Id: bigint.js,v 0.1 2010/09/11 17:07:30 dankogai Exp dankogai $
+ * $Id: bigint.js,v 0.2 2011/12/13 17:29:51 dankogai Exp dankogai $
  */
 
 (function() {
@@ -262,7 +262,7 @@ function bigint_from_any(x) {
         }
         return bigint_from_string(x1);
     }
-    return BigInt(1, 1);
+    return new BigInt(1, 1);
 }
 function bigint_neg(x) {
     var z = x.clone();
@@ -372,7 +372,7 @@ function bigint_divmod(x, y, modulo) {
     if (ny === 0 && yds[0] === 0) return null;    // Division by zero
     if (nx < ny || nx === ny && x.digits[nx - 1] < y.digits[ny - 1]) {
         if (modulo) return bigint_norm(x);
-        return BigInt(1, 1);
+        return new BigInt(1, 1);
     }
     xds = x.digits;
     if (ny === 1) {
@@ -520,7 +520,9 @@ function bigint_number(x) {
  * By Dan Kogai
  */
 
-BigInt.prototype = {
+(function(proto){
+    for (var name in proto) BigInt.prototype[name] = proto[name];
+})({
     toString: _BigInt_toString,
     toStringBase: _BigInt_toStringBase,
     clone: _BigInt_clone,
@@ -531,7 +533,7 @@ BigInt.prototype = {
     mod: function(y) { return bigint_mod(this, y) },
     cmp: function(y) { return bigint_cmp(this, y) },
     neg: function(y) { return bigint_neg(this) }
-};
+});
 
 Math.BigInt = BigInt;
 bigint = function(a) { return bigint_from_any(a) };

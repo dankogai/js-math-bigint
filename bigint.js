@@ -315,6 +315,12 @@ function bigint_sub_internal(x, y) {
         num >>>= 16;
         num &= 1;
     }
+    for (; 0 < num && i < x.len; i++) {
+        num = xds[i] - num;
+        zds[i] = (num & 0xffff);
+        num >>>= 16;
+        num &= 1;
+    }
     var norm = bigint_norm(z);
     return rev ? bigint_neg(norm) : norm;
 }

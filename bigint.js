@@ -131,10 +131,10 @@ function bigint_from_int(n) {
     }
     n &= 0x7fffffff;
     if (n <= 0xffff) {
-        big = new BigInt(1, 1);
+        big = new BigInt(1, sign);
         big.digits[0] = n;
     } else {
-        big = new BigInt(2, 1);
+        big = new BigInt(2, sign);
         big.digits[0] = (n & 0xffff);
         big.digits[1] = ((n >> 16) & 0xffff);
     }
@@ -269,20 +269,16 @@ function bigint_neg(x) {
     z.sign = !z.sign;
     return bigint_norm(z);
 }
-function bigint_add_internal(x, y, sign) {
-    var z, num, i, len;
-    sign = !!sign;
-    if (x.sign != sign) {
-        return sign ? bigint_sub_internal(y, x)
-                    : bigint_sub_internal(x, y);
+function bigint_add_internal(x, y, ySign) { // ySign is instead of y.sign
+    if (x.sign !== ySign) {
+        return bigint_sub_internal(x, y, !ySign);
     }
+    var z, num, i, len = y.len;
     if (x.len > y.len) {
-        len = x.len + 1;
+        len = x.len;
         z = x; x = y; y = z;
-    } else {
-        len = y.len + 1;
     }
-    z = new BigInt(len, sign);
+    z = new BigInt(++len, ySign);
     len = x.len;
     for (i = 0, num = 0; i < len; i++) {
         num += x.digits[i] + y.digits[i];
@@ -301,38 +297,54 @@ function bigint_add_internal(x, y, sign) {
     }
     z.digits[i] = (num & 0xffff);
     return bigint_norm(z);
-    //  return z;
 }
-function bigint_sub_internal(x, y) {
-    var z, zds, num, i, cmp = bigint_cmp(x, y), rev = 0;
-    if (cmp === 0) return bzero;
-    if (cmp < 0) { rev = 1; z = x; x = y; y = z; } // swap x y
-    z = x.clone();
-    var zds = z.digits, xds = x.digits, yds = y.digits;
-    for (i = 0, num = 0; i < y.len; i++) {
-        num = xds[i] - yds[i] - num;
-        zds[i] = (num & 0xffff);
-        num >>>= 16;
-        num &= 1;
+function bigint_sub_internal(x, y, ySign) { // ySign is instead of y.sign
+    if (x.sign !== ySign) {
+        return bigint_add_internal(x, y, !ySign);
     }
-    for (; 0 < num && i < x.len; i++) {
-        num = xds[i] - num;
-        zds[i] = (num & 0xffff);
-        num >>>= 16;
-        num &= 1;
+    var z, len = x.len;
+    if (x.len < y.len) {
+        len = y.len;
+        ySign = !ySign;
+        z = x; x = y; y = z;   // swap x y
     }
-    var norm = bigint_norm(z);
-    return rev ? bigint_neg(norm) : norm;
+    else if (x.len == y.len) {
+        while (len-- && (x.digits[len] == y.digits[len]));
+        if (len < 0) return bzero.clone();
+        if (x.digits[len] < y.digits[len]) {
+            ySign = !ySign;
+            z = x; x = y; y = z;    // swap x y
+        }
+        len++;
+    }
+
+    z = new BigInt(len, ySign);
+    var num, i, zds = z.digits, xds = x.digits, yds = y.digits, minLen = Math.min(y.len, len);
+    for (i = 0, num = 0; i < minLen; i++) { 
+        num += xds[i] - yds[i];
+        zds[i] = (num & 0xffff);
+        num >>= 16;
+    } 
+    while (num && i < len) {
+        num += xds[i];
+        zds[i++] = (num & 0xffff);
+        num >>= 16;
+    }
+    while (i < len) {
+        zds[i] = xds[i];
+        i++;
+    }
+    return bigint_norm(z);
 }
 function bigint_add(x, y) {
     x = bigint_from_any(x);
     y = bigint_from_any(y);
-    return bigint_add_internal(x, y, 1);
+    return bigint_add_internal(x, y, y.sign);
 }
 function bigint_sub(x, y) {
     x = bigint_from_any(x);
     y = bigint_from_any(y);
-    return bigint_sub_internal(x, y);
+    return bigint_sub_internal(x, y, y.sign);
 }
 function bigint_mul(x, y) {
     var i, j, n = 0, z, zds, xds, yds, dd, ee, ylen;
@@ -473,7 +485,7 @@ function bigint_divmod(x, y, modulo) {
         mod.len = ny;
         mod.sign = x.sign;
         if (x.sign != y.sign) {
-            return bigint_add_internal(mod, y, 1);
+            return bigint_add_internal(mod, y, y.sign);
         }
         return bigint_norm(mod);
     }

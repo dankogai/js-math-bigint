@@ -131,10 +131,10 @@ function bigint_from_int(n) {
     }
     n &= 0x7fffffff;
     if (n <= 0xffff) {
-        big = new BigInt(1, sign);
+        big = new BigInt(1, 1);
         big.digits[0] = n;
     } else {
-        big = new BigInt(2, sign);
+        big = new BigInt(2, 1);
         big.digits[0] = (n & 0xffff);
         big.digits[1] = ((n >> 16) & 0xffff);
     }
@@ -269,71 +269,60 @@ function bigint_neg(x) {
     z.sign = !z.sign;
     return bigint_norm(z);
 }
-function bigint_add_internal(x, y, sign) { // sign: disused
+function bigint_add_internal(x, y, sign) {
     var z, num, i, len;
-    /*
-    //sign = !!sign;
-    //if (x.sign != sign) {
-    //    return sign ? bigint_sub_internal(y, x)
-    //                : bigint_sub_internal(x, y);
-    //}
-    */
-    var cmp = bigint_cmp_abs(x, y);
-    if (0 < cmp) { rev = 1; z = x; x = y; y = z; } // swap x y
-    var xlen = x.len, ylen = y.len;
-    len = ylen;
-    z = new BigInt(len+1, true);
-    var xs = x.sign ? 1 : -1, ys = y.sign ? 1 : -1, zs = 1, xd, yd, sd;
-    for (i = 0, num=0; i < len; i++) {
-        xd = i < xlen ? xs * x.digits[i] : 0;
-        yd = ys * y.digits[i];
-        num += xd + yd;
-        sd = ys * num < 0 ? ys * 0x10000 : 0;
-        num += sd;
-        if (num) zs = num < 0 ? -1 : 1;
-        z.digits[i] = (zs * num) % 0x10000;
-        num = ~~(num / 0x10000) - ~~(sd / 0x10000);
+    sign = !!sign;
+    if (x.sign != sign) {
+        return sign ? bigint_sub_internal(y, x)
+                    : bigint_sub_internal(x, y);
     }
-    z.digits[i] = (zs * num) % 0x10000;
-    z.sign = zs < 0 ? false : true;
+    if (x.len > y.len) {
+        len = x.len + 1;
+        z = x; x = y; y = z;
+    } else {
+        len = y.len + 1;
+    }
+    z = new BigInt(len, sign);
+    len = x.len;
+    for (i = 0, num = 0; i < len; i++) {
+        num += x.digits[i] + y.digits[i];
+        z.digits[i] = (num & 0xffff);
+        num >>>= 16;
+    }
+    len = y.len;
+    while (num && i < len) {
+        num += y.digits[i];
+        z.digits[i++] = (num & 0xffff);
+        num >>>= 16;
+    }
+    while (i < len) {
+        z.digits[i] = y.digits[i];
+        i++;
+    }
+    z.digits[i] = (num & 0xffff);
     return bigint_norm(z);
     //  return z;
 }
 function bigint_sub_internal(x, y) {
-    return bigint_add_internal(x, bigint_neg(y));
-    /*
-    //var z, zds, num, i, cmp = bigint_cmp(x, y), rev = 0;
-    //if (cmp === 0) return bzero;
-    //if (cmp < 0) { rev = 1; z = x; x = y; y = z; } // swap x y
-    //z = x.clone();
-    //var zds = z.digits, xds = x.digits, yds = y.digits;
-    //for (i = 0, num = 0; i < y.len; i++) {
-    //    num = xds[i] - yds[i] - num;
-    //    zds[i] = (num & 0xffff);
-    //    num >>>= 16;
-    //    num &= 1;
-    //}
-    //for (; 0 < num && i < x.len; i++) {
-    //    num = xds[i] - num;
-    //    zds[i] = (num & 0xffff);
-    //    num >>>= 16;
-    //    num &= 1;
-    //}
-    //var norm = bigint_norm(z);
-    //return rev ? bigint_neg(norm) : norm;
-    */
-}
-function bigint_cmp_abs(x, y) {
-    var xlen;
-    if (x === y) return 0;       // Same object
-    x = bigint_from_any(x);
-    y = bigint_from_any(y);
-    xlen = x.len;
-    if (xlen < y.len) return -1;
-    if (xlen > y.len) return 1;
-    while (xlen-- && (x.digits[xlen] === y.digits[xlen]));
-    if (-1 === xlen) return 0;
-    return (x.digits[xlen] > y.digits[xlen]) ? 1 : -1;
+    var z, zds, num, i, cmp = bigint_cmp(x, y), rev = 0;
+    if (cmp === 0) return bzero;
+    if (cmp < 0) { rev = 1; z = x; x = y; y = z; } // swap x y
+    z = x.clone();
+    var zds = z.digits, xds = x.digits, yds = y.digits;
+    for (i = 0, num = 0; i < y.len; i++) {
+        num = xds[i] - yds[i] - num;
+        zds[i] = (num & 0xffff);
+        num >>>= 16;
+        num &= 1;
+    }
+    for (; 0 < num && i < x.len; i++) {
+        num = xds[i] - num;
+        zds[i] = (num & 0xffff);
+        num >>>= 16;
+        num &= 1;
+    }
+    var norm = bigint_norm(z);
+    return rev ? bigint_neg(norm) : norm;
 }
 function bigint_add(x, y) {
     x = bigint_from_any(x);

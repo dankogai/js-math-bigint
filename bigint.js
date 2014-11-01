@@ -549,7 +549,8 @@ function bigint_number(x) {
     div: function(y) { return bigint_div(this, y) },
     mod: function(y) { return bigint_mod(this, y) },
     cmp: function(y) { return bigint_cmp(this, y) },
-    neg: function(y) { return bigint_neg(this) }
+    neg: function(y) { return bigint_neg(this) },
+    VERSION: "2.1.0"
 });
 
 Math.BigInt = BigInt;

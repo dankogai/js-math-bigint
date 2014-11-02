@@ -117,8 +117,12 @@ function BigInt(len, sign) {
 
 function bigint_norm(x) {
     var len = x.len, ds = x.digits;
-    while (len-- && !ds[len]);
+    while (len-- && len && !ds[len]);
     x.len = ++len;
+    if (x.len === 1 && ds[0] === 0)
+    {
+        x.sign = true;
+    }
     return x;
 }
 function bigint_from_int(n) {
@@ -387,7 +391,7 @@ function bigint_divmod(x, y, modulo) {
         ee,
         mod, div;
     yds = y.digits;
-    if (ny === 0 && yds[0] === 0) return null;    // Division by zero
+    if (ny === 1 && yds[0] === 0) return null;    // Division by zero
     if (nx < ny || nx === ny && x.digits[nx - 1] < y.digits[ny - 1]) {
         if (modulo) return bigint_norm(x);
         return new BigInt(1, 1);

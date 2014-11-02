@@ -555,7 +555,7 @@ function bigint_number(x) {
     mod: function(y) { return bigint_mod(this, y) },
     cmp: function(y) { return bigint_cmp(this, y) },
     neg: function(y) { return bigint_neg(this) },
-    VERSION: "2.1.0"
+    VERSION: "2.1.1"
 });
 
 Math.BigInt = BigInt;

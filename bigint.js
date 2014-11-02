@@ -410,9 +410,6 @@ function bigint_divmod(x, y, modulo) {
         z.sign = (x.sign === y.sign);
         if (modulo) {
             if (!x.sign) t2 = -t2;
-            if (x.sign != y.sign) {
-                t2 = t2 + yds[0] * (y.sign ? 1 : -1);
-            }
             return bigint_from_int(t2);
         }
         return bigint_norm(z);
@@ -487,9 +484,6 @@ function bigint_divmod(x, y, modulo) {
         }
         mod.len = ny;
         mod.sign = x.sign;
-        if (x.sign != y.sign) {
-            return bigint_add_internal(mod, y, y.sign);
-        }
         return bigint_norm(mod);
     }
     div = z.clone();

@@ -144,7 +144,6 @@ function bigint_from_int(n) {
     }
     return big;
 }
-var bzero = bigint_from_int(0);
 function bigint_from_string(str, base) {
     var str_i, sign = true, c, len, z, zds, num, i, blen = 1;
     str += '@'; // Terminator;
@@ -238,7 +237,7 @@ function bigint_from_string(str, base) {
 }
 function bigint_from_any(x) {
     if (typeof(x) === 'object') {
-        return (x instanceof BigInt) ? x : bzero;
+        return (x instanceof BigInt) ? x : new BigInt(1, true);
     }
     if (typeof(x) === 'string') {
         return bigint_from_string(x);
@@ -393,7 +392,7 @@ function bigint_divmod(x, y, modulo) {
     yds = y.digits;
     if (ny === 1 && yds[0] === 0) return null;    // Division by zero
     if (nx < ny || nx === ny && x.digits[nx - 1] < y.digits[ny - 1]) {
-        if (modulo) return bigint_norm(x);
+        if (modulo) return x.clone();
         return new BigInt(1, 1);
     }
     xds = x.digits;
@@ -559,6 +558,9 @@ function bigint_number(x) {
 });
 
 Math.BigInt = BigInt;
-bigint = function(a) { return bigint_from_any(a) };
+bigint = function(a) {
+    var x = bigint_from_any(a);
+    return (x === a) ? x = x.clone() : x;
+};
 
 })();

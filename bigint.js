@@ -8,8 +8,8 @@
 //
 // BigInt.js - Arbitrary size integer math package for JavaScript
 // Copyright (C) 2000 Masanao Izumo <iz@onicos.co.jp>
-// Copyright (C) 2010 Dan Kogai <dankogai+404bnf@gmail.com>
-// Version: 1.0.1
+// Copyright (C) 2010 Dan Kogai <dankogai+github@gmail.com>
+// Copyright (C) 2014 yottan <https://github.com/yottan>
 // Licence: GPL
 //
 // This program is free software; you can redistribute it and/or modify
@@ -548,7 +548,7 @@ function bigint_number(x) {
     mod: function(y) { return bigint_mod(this, y) },
     cmp: function(y) { return bigint_cmp(this, y) },
     neg: function(y) { return bigint_neg(this) },
-    VERSION: "2.1.1"
+    VERSION: "2.2.0"
 });
 
 Math.BigInt = BigInt;

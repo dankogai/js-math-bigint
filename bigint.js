@@ -313,7 +313,7 @@ function bigint_sub_internal(x, y, ySign) { // ySign is instead of y.sign
     }
     else if (x.len == y.len) {
         while (len-- && (x.digits[len] == y.digits[len]));
-        if (len < 0) return bzero.clone();
+        if (len < 0) return new BigInt(1, true);
         if (x.digits[len] < y.digits[len]) {
             ySign = !ySign;
             z = x; x = y; y = z;    // swap x y
